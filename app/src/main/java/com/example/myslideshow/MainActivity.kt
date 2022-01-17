@@ -2,10 +2,13 @@ package com.example.myslideshow
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.myslideshow.databinding.ActivityMainBinding
+import kotlin.concurrent.timer
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setupBinding()
         setupPager()
+        setupTimer()
     }
 
     private fun setupBinding() {
@@ -49,4 +53,19 @@ class MainActivity : AppCompatActivity() {
     private fun setupPager() {
         binding.pager.adapter = MyAdapter(this)
     }
+
+    private fun setupTimer() {
+        // Handlerのインスタンスを取得
+        // Looper.getMainLooper()を渡すとメインスレッド（UIスレッド）に接続できる
+        val handler = Handler(Looper.getMainLooper())
+        timer(period = 5000) {
+            // メインスレッドに接続するhandlerを使って更新
+            handler.post {
+                binding.apply {
+                    pager.currentItem = (pager.currentItem + 1) % 10
+                }
+            }
+        }
+    }
+
 }
