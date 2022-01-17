@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.example.myslideshow.databinding.ActivityMainBinding
 import kotlin.concurrent.timer
 
@@ -58,6 +60,40 @@ class MainActivity : AppCompatActivity() {
         player.pause()
     }
 
+    class ViewPager2PageTransformation: ViewPager2.PageTransformer {
+
+        override fun transformPage(page: View, position: Float) {
+            transformPager(page, position)
+        }
+
+        private fun transformPager(page: View, position: Float) {
+            when {
+                position < -1 -> {
+                    shrinkView(page)
+                }
+                position <= 1 -> {
+                    animateView(page, position)
+                }
+                else -> {
+                    shrinkView(page)
+                }
+            }
+        }
+
+        private fun animateView(page: View, position: Float) {
+            page.alpha = Math.max(0.2f, 1 - Math.abs(position))
+            page.scaleX = Math.max(0.2f, 1 - Math.abs(position))
+            page.scaleY = Math.max(0.2f, 1 - Math.abs(position))
+        }
+
+        private fun shrinkView(page: View) {
+            page.alpha = 0.2f
+            page.scaleX = 0.2f
+            page.scaleY = 0.2f
+        }
+
+    }
+
     private fun setupBinding() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -66,6 +102,7 @@ class MainActivity : AppCompatActivity() {
     // ViewPager2とFragmentStateAdapterの関連付け
     private fun setupPager() {
         binding.pager.adapter = MyAdapter(this)
+        binding.pager.setPageTransformer(ViewPager2PageTransformation())
     }
 
     private fun setupTimer() {
